@@ -1,139 +1,117 @@
-# ⚡ SUPERAGENT 4.0 — IRONCLAW
+# Hermes Crypto Agent — Skill
 
-### OpenClaw Edition · ⚙️ Hermes-Compatible
+Multi-chain crypto + Web3 agent toolkit untuk Hermes AI Agent.
 
-Production-grade autonomous agent brain — crypto + dev, self-hosted, integrity-verified.
-**Compatible dengan Hermes runtime** (full H1–H10 crypto dispatch: swap · bridge · DeFi · sniping · monitoring · NFT · contract · deploy). Successor to v2.
+## Kapabilitas
 
-`v4.0` · 22 skills · 🔒 integrity-verified · keys never leave your VPS
+### Crypto Core
+- ✅ Buat wallet baru di EVM / Solana / Sui / Aptos / TON
+- ✅ Import wallet dari seed phrase atau private key
+- ✅ Swap & sell token via contract address (1inch / Jupiter)
+- ✅ Beli/jual NFT (OpenSea, Blur, LooksRare, Magic Eden, Tensor — via Reservoir)
+- ✅ Sniping token launch + NFT mint (dengan honeypot/GoPlus safety gate)
+- ✅ Otomatisasi airdrop multi-wallet (randomized delay + amount jitter + resume)
 
----
+### Web3 Lanjutan
+- ✅ **Bridge cross-chain**: LI.FI aggregator + Stargate V2 (LayerZero farming) + Across + Wormhole/Mayan + native L1↔L2
+- ✅ **DeFi**: Aave/Compound/Morpho lending, Lido/Marinade/Jito staking, EigenLayer restaking, Uniswap V3 concentrated LP, GMX V2 / Hyperliquid perp, Yearn / Pendle
+- ✅ **Sign-in & connect**: SIWE (EIP-4361), WalletConnect v2, EIP-712 typed data, ERC-2612 Permit, EIP-1271 universal verify, ENS/SNS resolution
 
-## Quick start
+### On-Chain Monitoring (Expanded)
+- ✅ **Basic**: wallet/whale tracker (WebSocket + Webhook), ERC-20 Transfer listener, multi-chain portfolio (Zerion/DeBank/Birdeye), DexScreener price alert, Aave health monitor, Telegram/Discord notifier, RPC failover
+- ✅ **Mempool sniffer realtime**: filter framework + frontrun protection + approval drainer detection (anti-scam untuk user wallet)
+- ✅ **Smart-money tracker**: Nansen + Arkham + Dune integration, copy-trade pattern, top-holder watch
+- ✅ **NFT whale alert**: Reservoir WS stream, Magic Eden whale, floor-drop alert
+- ✅ **Contract deployment listener**: detect new ERC-20/NFT contract, auto-classify via bytecode, new token launch detector (deploy → liquidity-add → alert)
 
-### Install on VPS
-> ⚠️ Konvensi OpenClaw berubah — ikuti **`DEPLOY.md`** (root) untuk langkah yang akurat. Blok di bawah ini ditahan sebagai referensi historis.
+## Struktur
 
-```bash
-# 1. Drop this folder into the agent workspace
-cp -r openclaw ~/.openclaw/workspace/superagent-v3/
-
-# 2. Point the agent config at it
-nano ~/.openclaw/workspace/openclaw-agents.json
-# Add or update:
-# {
-#   "system_prompt_path": "~/.openclaw/workspace/superagent-v3/AGENTS.md",
-#   "skills_dir": "~/.openclaw/workspace/superagent-v3/skills",
-#   "memory_dir": "~/.openclaw/workspace/superagent-v3/memory"
-# }
-
-# 3. (RECOMMENDED) Enable time-awareness injection in host wrapper
-#    See TIME.md Layer 1 for the host-side code that prepends
-#    [RUNTIME CONTEXT] block to every user message. Without this,
-#    agent falls back to tool call (Layer 2) or inference (Layer 4).
-
-# 4. Restart the agent
-pm2 restart openclaw  # or screen -r / systemctl
+```
+skills/hermes/
+├── SKILL.md
+├── DISPATCH.md
+├── README.md
+├── references/  (15 files)
+│   ├── wallets.md             swap.md            nft.md            sniping.md
+│   ├── airdrop_automation.md  bridge.md          defi.md
+│   ├── web3_connect.md        monitoring.md      security.md
+│   ├── governor.md            browser.md         (v4.0)
+│   ├── contract_read.md       contract_write.md  (v4.0)
+│   ├── deploy.md              (v4.0)
+└── scripts/  (14 files)
+    ├── wallet_manager.py      swap_engine.py     nft_engine.py
+    ├── bridge_engine.py       web3_connect.py
+    ├── monitoring.py          monitoring_advanced.py
+    ├── airdrop_runner.py
+    ├── governor.py             mev.py             browser_engine.py  (v4.0)
+    ├── contract_reader.py      contract_writer.py (v4.0)
+    └── deploy_engine.py        (v4.0)
 ```
 
-### Load order
-1. `AGENTS.md` — core router (always loaded)
-2. `IDENTITY.md` + `SOUL.md` — character (always loaded)
-3. `HEARTBEAT.md` + `TOOLS.md` + `MEMORY.md` — runtime config (always loaded)
-4. `USER.md` — operator profile (always loaded, customize first)
-5. `skills/m*.md` and `skills/x*.md` — loaded on-demand by router
+## Dependencies (Python)
 
-Always-on token budget: ~3.5k. Skills bring task-specific knowledge only when triggered.
+```bash
+pip install web3 eth-account mnemonic solders solana httpx \
+            cryptography pysui aptos-sdk tonsdk base58 bip-utils \
+            ens hyperliquid-python-sdk websockets
+```
 
----
+## Environment Variables
 
-## What's new in v4.0
+```bash
+# Vault
+export HERMES_MASTER_PW="..."
 
-Major release dari baseline v3.1 — nambahin lapisan keamanan/governance, self-improvement, asisten harian, tooling smart-contract (baca/tulis/deploy), manajemen LLM dinamis, power pack orkestrasi, dan skill software-engineering.
+# Trading & NFT
+export ONEINCH_API_KEY="..."              # https://portal.1inch.dev
+export RESERVOIR_API_KEY="..."            # https://reservoir.tools
 
-- **🛡 Safety & governance** — Spend Governor (cap + kill-switch), MEV protection, skill integrity (`SKILLS.lock`), FROZEN_PATHS.
-- **🧠 Self-improvement** — compounding memory + reflection loop (x4), semua di balik gate struktural.
-- **📅 Daily assistant (m14/m15)** — briefing, alert engine, watchdog, vault+macro, voice/screenshot input, triage.
-- **🔗 Contract tooling** — universal reader + writer (gated) + crypto-dev deploy/compile/test/verify (CREATE2).
-- **🧩 Dynamic LLM (m7)** — `add model` satu perintah, key terenkripsi, masuk cascade R7.
-- **⚙️ Power Pack (m17)** — planner, swarm, skill-forge, automation, backtest, dashboard, voice mode, explainability.
-- **💻 Software engineering (m16)** — backend/db/testing/scaffold/refactor; full-stack bareng m9+m2+x3.
-- **🛠 Tooling** — `.env.example` lengkap + `DEPLOY.md`.
+# Portfolio
+export ZERION_API_KEY_B64="..."           # base64('apikey:')
+export BIRDEYE_API_KEY="..."
 
-Detail lengkap di `CHANGELOG.md` (v4.0 section).
+# Smart Money (advanced monitoring)
+export NANSEN_API_KEY="..."               # paid, paling akurat
+export ARKHAM_API_KEY="..."               # free tier ada
+export DUNE_API_KEY="..."                 # custom queries
 
-## What's in v3
+# RPC per chain (recommended punya 2+ untuk failover, plus WS untuk monitoring)
+export RPC_EVM_ETHEREUM="https://..."
+export WS_RPC_EVM_ETHEREUM="wss://..."
+export RPC_EVM_BASE="https://..."
+export RPC_SOLANA="https://..."
 
-### Core files
-| File | Purpose |
-|---|---|
-| `AGENTS.md` | Router, rules R1-R10, weighted keyword table |
-| `IDENTITY.md` | Response speed tiers, character modes |
-| `SOUL.md` | Flexibility doctrine, hard stops, operational rails |
-| `TIME.md` | **5-layer time awareness** (NEW — system inject → tool call → cache → infer → disclose) |
-| `HEARTBEAT.md` | Session continuity, time refresh, token discipline |
-| `TOOLS.md` | Agent-side vs operator-side execution, time tool specs |
-| `USER.md` | Operator profile template (FILL THIS IN) |
-| `MEMORY.md` | Compaction rules, format |
-| `CONTRIBUTORS.md` | Credits — community contributors |
-| `panduan.md` | Operator usage guide with real examples |
+# Notifier (optional)
+export HERMES_TG_BOT_TOKEN="..."
+export HERMES_TG_CHAT_ID="..."
+export HERMES_DISCORD_WEBHOOK="..."
+```
 
-### Skills
-| Skill | Domain |
-|---|---|
-| m0 | Skill registry, reflection loop |
-| m1 | Monetization, business ops |
-| m2 | VPS, infra, deployment |
-| m3 | Content, copywriting, Indonesian voice |
-| m4 | Telegram bots, production patterns |
-| m5 | Data handling, snapshots, large files |
-| m6 | Integrations, payments, webhooks |
-| m7 | AI providers, multi-LLM, streaming, fallback |
-| m8 | Documents (docx/xlsx/pptx/pdf), images |
-| m9 | Frontend, landing pages, Web3 UI |
-| **m10** | **Web3 ops, on-chain, mass farming** *(NEW)* |
-| **m11** | **Security audit, skill safety, secret scan** *(NEW)* |
-| **m12** | **Batch ops, parallel exec, queues** *(NEW)* |
-| **m13** | **Universal NFT minter — OpenSea/Manifold/Zora, auto-gas** *(NEW)* |
-| **hermes** | **Deep crypto layer** — multi-chain wallets, 1inch/Jupiter swap, Seaport/Blur/ME NFT buy, LI.FI bridge, Aave/Lido/GMX DeFi, mempool sniffer, Nansen/Arkham smart money, sniping with honeypot gate *(INTEGRATED)* |
-| x1 | Self-audit, system refinement |
-| x2 | Deep decomposition, strategy |
-| x3 | Debug, fault diagnosis |
+## Prinsip Operasi Hermes
 
----
+1. **User-funds-only** — tolak credential mencurigakan
+2. **No drainer / no scam sybil** — multi-wallet automation OK di wallet sendiri
+3. **Confirm before signing** — selalu tampilkan plan decoded (bukan raw hex)
+4. **Simulasi sebelum eksekusi**
+5. **Secret hygiene** — encrypted vault, audit log auto-redact
 
-## Configure for your operator
-Edit `USER.md`:
-- Name, honorific, timezone
-- Domain focus checkboxes
-- Trigger phrases
-- Language default
+## Reminder ke User (Wajib Satu Kali Per Sesi Multi-Wallet)
 
----
+> "Banyak proyek airdrop (LayerZero, zkSync, Linea, dll) punya deteksi sybil yang bisa blacklist semua wallet terkait. Saya bisa randomize timing & amount + variasi bridge per wallet, tapi tidak menjamin lolos. ToS proyek tanggung jawab Anda."
 
-## Upgrade from v2
-- Back up v2 memory: `cp -r ~/.openclaw/workspace/superagent-v2/memory ~/.openclaw/backups/`
-- Drop v3 in beside it (don't overwrite v2 immediately)
-- Test on staging agent if available
-- Migrate memory: copy daily logs into `v3/memory/`
-- Switch agent config to v3 path
-- Keep v2 for 7 days before deleting
+## Pattern Use Cases
 
-See `CHANGELOG.md` for full version history.
+### LayerZero Points Farming
+Bridge via Stargate V2 langsung ke variasi chain. Randomized timing 5–180 menit antar wallet, amount jitter ±15%.
 
----
+### Anti-Drainer Mempool Watch
+`MempoolSniffer` watch wallet user untuk pending `approve()`, `setApprovalForAll()`, `permit()`. Kalau detect, push critical alert ke Telegram sebelum tx confirmed.
 
-## Token budget
-- Always-on: ~3.5k
-- Light skill load (1 skill): +0.5-1.5k
-- Heavy skill load (2-3 skills, e.g. m4+m7+m10 on Web3 bot bug): +3-5k
-- Hermes deep ref: +2-4k per reference, loaded only on H-skill match
-- Hard ceiling: 12k context spent on system. If higher, run x1 audit.
+### Smart-Money Copy-Trade
+Pakai `copy_trade_arkham()` — poll Arkham transfer history wallet whale, mirror buy ukuran kecil di Hermes wallet (filter out stablecoin & low-value).
 
-## How hermes loads (token discipline)
-H-skills never preload. When operator mentions e.g. "bridge layerzero":
-1. `hermes/DISPATCH.md` loads once per session (cached)
-2. `hermes/references/bridge.md` loads only when bridge keyword fires
-3. Other 9 references stay on disk until their keywords trigger
+### New Token Launch Sniping
+`detect_new_token_launches()` watch deployment ERC-20 → tunggu 5 menit → cek pair Uniswap V2 → kalau ada, alert dengan safety check sebagai gate.
 
-10 deep references add ~0 always-on cost.
+### Sniping dengan Safety Gate
+Listen `PairCreated` → honeypot.is + GoPlus check → CRITICAL flag = block, WARN = escalate ke user.
